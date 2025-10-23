@@ -1,11 +1,11 @@
-# videos-subtitles — README
+# 🎬 videos-subtitles
 
-Herramientas locales para **transcribir (EN)**, **traducir (EN→ES)** y **quemar subtítulos** en tus videos, optimizado para macOS con Apple Silicon (M-series).  
-Usa **faster-whisper** para transcripción y **MarianMT (transformers)** para traducción. Incluye barras de progreso.
+Herramienta local para **transcribir (EN)**, **traducir (EN→ES)** y **quemar subtítulos** en tus videos, optimizada para macOS con Apple Silicon (M-series).  
+Usa **faster-whisper** para transcripción y **MarianMT (transformers)** para traducción, con barras de progreso.
 
 ---
 
-## 0) Requisitos (una sola vez)
+## ⚙️ 0) Requisitos (una sola vez)
 
 ```bash
 brew install pyenv pyenv-virtualenv ffmpeg git
@@ -30,20 +30,34 @@ source ~/.zshrc
 
 ---
 
-## 1) Setup del proyecto
+## 🚀 1) Setup del proyecto
+
+### 1.1 Clonar el repositorio
 
 ```bash
-mkdir -p ~/videos-subtitles && cd ~/videos-subtitles
+git clone https://github.com/<tuusuario>/videos-subtitles.git
+cd videos-subtitles
+```
+
+### 1.2 Crear entorno Python
+
+```bash
 pyenv install 3.12.6
 pyenv virtualenv 3.12.6 whisper-env
 pyenv local whisper-env
 python -V
 ```
 
-### 1.1 Instalar dependencias
+### 1.3 Instalar dependencias
 
 ```bash
 pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt
+```
+
+O si prefieres manualmente:
+
+```bash
 pip install faster-whisper torch torchvision torchaudio
 pip install transformers sentencepiece
 pip install srt tqdm sacremoses
@@ -51,24 +65,30 @@ pip install srt tqdm sacremoses
 
 ---
 
-## 2) Archivos requeridos
+## 🧩 2) Archivos del proyecto
 
-Coloca en la carpeta `~/videos-subtitles/` los siguientes archivos:
+Estos archivos deben estar en la raíz del repo:
 
-- `subtify.sh`
-- `transcribe.py`
-- `translate_bilingual.py`
+```
+videos-subtitles/
+├── subtify.sh
+├── transcribe.py
+├── translate_bilingual.py
+└── requirements.txt
+```
 
-Y da permisos:
+Y da permisos al script principal:
+
 ```bash
 chmod +x subtify.sh
 ```
 
 ---
 
-## 3) Uso
+## ▶️ 3) Uso básico
 
-### 3.1 Ejemplo básico
+### 3.1 Transcribir, traducir y quemar subtítulos
+
 ```bash
 ./subtify.sh "/Users/marlon/Downloads/Timeline.mov"
 ```
@@ -84,35 +104,40 @@ Timeline/
 ```
 
 ### 3.2 Elegir modelo
+
 ```bash
 ./subtify.sh "/Users/marlon/Downloads/Timeline.mov" medium
 ```
 
+Modelos disponibles: `base`, `small`, `medium`, `large-v3`.
+
 ---
 
-## 4) Ajustes y rendimiento
+## ⚡ 4) Rendimiento y ajustes
 
-- `large-v3` → mayor precisión, más lento.  
-- `medium` → más rápido, buena precisión.  
+- `large-v3` → máxima precisión, más lento.  
+- `medium` → excelente balance velocidad/precisión.  
 - `small` / `base` → pruebas rápidas.
 
 ### Ajustes recomendados en `transcribe.py`
+
 ```python
 segments, info = model.transcribe(
     video_path,
-    beam_size=3,
-    vad_filter=False,
+    beam_size=3,      # 1–3 = más rápido, menos preciso
+    vad_filter=False, # si el audio es limpio
     language="en",
 )
 ```
 
-### Tamaño de lote de traducción
-En `translate_bilingual.py`:
+### Tamaño de lote de traducción (`translate_bilingual.py`)
+
 ```python
-batch_size = 40
+batch_size = 40  # 32–48 es ideal para 48 GB de RAM
 ```
 
-### Tip: extraer audio antes
+### Tip: extraer audio antes (para más velocidad)
+
 ```bash
 ffmpeg -i video.mov -vn -acodec pcm_s16le -ar 16000 -ac 1 audio.wav
 ./subtify.sh "./audio.wav"
@@ -120,27 +145,18 @@ ffmpeg -i video.mov -vn -acodec pcm_s16le -ar 16000 -ac 1 audio.wav
 
 ---
 
-## 5) Solución de problemas
+## 🧰 5) Solución de problemas
 
-- **Warning float16 → float32:** No es error, Apple usa float32.
-- **`ModuleNotFoundError: srt`:** Instálalo en el entorno correcto.
-- **`pyenv activate whisper-env` falla:** revisa configuración de `~/.zshrc`.
-
----
-
-## 6) Estructura del proyecto
-
-```
-videos-subtitles/
-├── subtify.sh
-├── transcribe.py
-├── translate_bilingual.py
-└── requirements.txt
-```
+| Problema | Solución |
+|-----------|-----------|
+| ⚠️ *float16 → float32 warning* | Normal en Mac. Apple usa float32. |
+| ❌ `ModuleNotFoundError: srt` | Instálalo en el venv correcto. |
+| ⚠️ `pyenv activate whisper-env` falla | Revisa configuración en `~/.zshrc`. |
+| 🐢 Transcribe muy lento | Usa modelo `medium`, `beam_size=3`, `vad_filter=False`, o WAV. |
 
 ---
 
-## 7) Ejemplos finales
+## 📖 6) Ejemplos rápidos
 
 ```bash
 ./subtify.sh "/Users/marlon/Downloads/Timeline.mov"
@@ -151,4 +167,8 @@ ffmpeg -i "/Users/marlon/Downloads/Timeline.mov" -vn -acodec pcm_s16le -ar 16000
 
 ---
 
-© 2025 Marlon Guerra — uso personal y educativo.
+## 🧡 Créditos
+
+Proyecto mantenido por **Marlon Guerra (2025)**  
+Uso personal y educativo — compatible con macOS (M-series) y Linux.
+
